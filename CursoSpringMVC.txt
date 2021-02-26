@@ -1,0 +1,185 @@
+===============
+Curso SpringMVC
+===============
+
+Eclipse
+MariaDB - HeidiSQL
+Java 8
+
+Aplicação Web, utilizando um Servlet
+Padrão de projeto chamado MVC, separação de responsabilidades da lógica da aplicação através de um Controller, que receberá as requisições e redirecionar para uma Action específica, que sabe qual Modelo/Classe deverá ser utilizada para responder o usuário.
+
+Ex.: Uma requisição para: localhost:8080/pedisos; um Get para /pedidos
+
+A requisição chegaria para o Servlet, que verificará qual o path que está sendo chamado (/pedidos), e identificaria qual a Action que sabe responder isso, e aí pegaria o http servlet request, mandaria para essa Action que iria, no modelo, usar o pedido service para pegar/dar um get pedidos, e retorna do banco de dados, o modelo vai no banco de dados e pega a lista de pedidos que está cadastrada.
+
+Dado que a Action já retornou essa informação, o que a Servlet precisa fazer é redirecinar isso para a JSP específica para processar essa requisição, que tem a inteligência de pegar a lista que foi recuperada pela Action através do Modelo e gera um html que vai ser enviado para o usuário. 
+
+Aqui temos a separação utilizando Spring MVC.
+
+SpringBoot já vem com o Tomcat integrado.
+
+Servlet: projeto Spring MVC, já pré configurado junto com o SpringBoot.
+
+As requisições batem no Spring MVC, e não sabe chegar no pedido.
+
+Para integrar o Modelo com o Spring MVC, é necessário criar um Controller, que é uma classe, e cada método dessas classes Controllers são Actions diferentes.
+
+Ex.: localhost:8080/pedido, vai bater no PedidoController e vai retornar do Modelo uma lista de pedidos, e ele vai adicionar isso na requisição do usuário para ser processado na view, para a view poder gerar uma tela/interface para o usuário, que nesse caso será utilizado o Thymeleaf, junto com uma ExpressionLanguage e uma bliblioteca de CSS chamada Bootstrap, que irá fornecer o Layout da aplicação , que ajusta a tela para diferentes tipos de dispositivos.
+
+Início do projeto com SpringBoot, utilizando SpringMVC (Um framework Java que ajuda no desenvolvimento de aplicações Web, o Spring MVC facilita o trabalho com o protocolo HTTP e a criação de HTML dinamicamente, seguindo boas práticas de desenvolvimento.
+
+spring.io
+Munu Projects
+SpringBoot integrado com SpringFramewrok (SpringMVC)
+
+Aba Learn
+Reference Doc
+
+Getting Started
+Maven Project
+
+SpringWeb
+Thymeleaf
+DevTolls: Faz o restart da aplicação enquanto estamos programando logo que ele detecta alguma modificação, ele agiliza a programação porque evita de ter que ficar derrubando servidor e subindo novamente.
+Generate
+Feito isso, descompacte o arquivo na pasta do WorkSpace e importe o projeto.
+
+No Eclipse: Import/Maven
+Existing Maven Projects
+Paste Mudi
+
+Todas as dependências que estão no pom.xml serão baixadas.
+
+<dependencies>
+	<dependency>
+	</dependency>
+</dependencies>
+
+Foi criado uma classe chamada MudiApplication com o método main, que ao rodar, a aplicação já vai subir com Tomcat configurado.
+
+==============================
+Criação do Primeiro Controller
+==============================
+
+Criar a primeira tela, o primeiro Controller e mandar as informações do Controller pra tela processando com o Thymeleaf.
+
+Criar uma classe HelloController, onde serão adicionadas as nossas Actions.
+
+Vamos criar um método, que retorna uma String, chamado de hello, que vai processar u ma requisição do usuário e vai redirecionar para uma detemrinada view, no caso uma view chamada "hello":
+
+puclic class HelloController {
+	public String hello(){
+		return "hello";
+	}
+}
+
+Por padrão, as páginas no Thymeleaf são html normais.
+
+na pasta src/main/resources/templates será criado um arquivo html com o nome de hello.html:
+
+<html>
+	<head>
+		<meta charset="UTF-8/>
+	</head>
+	<body>
+		oi
+	</body>
+</htm>
+
+Como se chegar nessa view?
+Na requisição bate no Spring tem que ser redirecionada para o método hello() que é uma action, ou seja, as actions são métodos de classes Controllers e o retorno dessa Action é o nome da view que deve ser processada, cuja a requisição deve ser redirecionada para gerar o html que vai se devolvido para o usuário.
+
+Para integrar a nossa classe HelloController, a nossa aplicação com o Spring, são utilizadas as anotações "@", @Controller.
+Quando uma classe é anotada com o @Controller, ela passa a ser gerenciada pelo Spring.
+
+@Controller
+puclic class HelloController {
+	public String hello(){
+		return "hello";
+	}
+}
+
+Cada método é uma Action que o Spring vai mapear as requisições para bater nos métodos dos nossos controllers, que podem ser vários.
+
+Nesse caso, estamos fazendo uma requisição, um método get para hello.
+Para que essa requisição get chamada de hello bata nesse método, e avise o Spring que ao receber o método /hello para chamar o método que vai processar, deve ser utilizado a anotação chamada @GetMapping e dentro da anotação, deve ser passado como parâmetro o path que deve ser chamado para bater no médoto hello(), que até o momento está apenas retornando a String "hello" que é o nome da view, com a mensagem "oi".
+
+@Controller
+puclic class HelloController {
+
+	@GetMapping("/hello")
+	public String hello(){
+		return "hello";
+	}
+}
+
+Para adicionar valores a partir das nossas actions, adicionar informações como valores e variáveis que possam ser lidos na view, ou seja, como as views recebem as informações.
+
+Por exemplo, se na Action tivesse chamado o método pedidoService.getPedidos().
+
+Usando o (HttpServletRequest request), você consegue adicionar atributos neles que já vão ser acessados pela view: request.setAttribute("nome", "Mundo"), onde "nome" é o atributo/variável e "Mundo" é o valor.
+
+@Controller
+puclic class HelloController {
+
+	@GetMapping("/hello")
+	public String hello(HttpServletRequest request){
+		Request.setAttribute("nome", "Mundo");
+		return "hello";
+	}
+}
+
+Os valores que estão no Request podem ser acessados na camada de visão usando o Thymeleaf, por exemplo:
+
+
+<html>
+	<head>
+		<meta charset="UTF-8/>
+	</head>
+	<body>
+		oi <span>João</span> (valor que será substituído pelo Thymeleaf(
+	</body>
+</htm>
+
+Se for atualizado o localhost:8080/hello, será apresentado a mensagem "Oi João".
+
+Para que o Thymeleaf substiua o valor atual pelo atributo/variável "nome":
+
+<html>
+	<head>
+		<meta charset="UTF-8/>
+	</head>
+	<body>
+		oi <span th:text"${nome}">João</span> (valor que será substituído pelo Thymeleaf(
+	</body>
+</htm>
+
+Agora, ao atualizar o localhost:8080/hello, será apresentado a mensagem "Oi Mundo". O Thymeleaf processou o html e substituiu o valor contido dentro do <span>João</span> (João) pelo valor que ele pegou no atributo/variável do request "nome".
+
+Nós não precisamos utilizar o HttpServletRequest porque o Spring nos dá a Interface Model, onde podemos adicionar valores nele chamando o método add. O Model funciona da mesma forma que o HttpServletRequest, mas sem precisar utilizar a camada mais abaixo, a camada de Servlets, fazendo com que a gente permaneça no nível do Spring.
+
+@Controller
+puclic class HelloController {
+
+	@GetMapping("/hello")
+	public String hello(Model model){
+		model.addAttribute("nome", "Mundo");
+		return "hello";
+	}
+}
+
+================
+Criando o Modelo
+================
+
+
+
+
+
+
+
+
+
+
+
